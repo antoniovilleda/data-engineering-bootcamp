@@ -64,9 +64,21 @@ db_password = "dbpassword"
 publicly_accessible = false
 
 #### S3 variables ####
-bucket_prefix = "s3-Data-bootcamp-"
+bucket_prefix = "s3-data-bootcamp-"
 
 acl = "private"
 
 versioning = true
 
+#### Redshift variables #### 
+###database_name   = var.database_name already selected ####
+cluster_identifier = "my-cluster"
+node_type = "dc2.large"
+cluster_type = "multi-node"
+number_of_nodes = 2
+
+
+master_username = "master_username"
+master_password = "Master_password1"
+skip_final_snapshot = true
+db_port_redshift = 5439

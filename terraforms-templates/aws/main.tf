@@ -38,40 +38,7 @@ module "eks" {
 #   ec2_instance_type              = var.ec2_instance_type
 # }
 
-module "rds" {
-  source = "./modules/rds"
-
-  vpc_id_rds        = module.networking.vpc_id
-  subnets_rds        = module.networking.private_subnets_ids
-
-  allocated_storage   = var.allocated_storage
-  db_engine           = var.db_engine
-  db_port             = var.db_port
-  engine_version      = var.engine_version
-  instance_type       = var.instance_type
-  database_name       = var.database_name
-  db_username         = var.db_username
-  db_password         = var.db_password
-  publicly_accessible = var.publicly_accessible
-}
-
-module "rds" {
-  source = "./modules/rds"
-
-  vpc_id_rds        = module.networking.vpc_id
-  subnets_rds        = module.networking.private_subnets_ids
-
-  allocated_storage   = var.allocated_storage
-  db_engine           = var.db_engine
-  db_port             = var.db_port
-  engine_version      = var.engine_version
-  instance_type       = var.instance_type
-  database_name       = var.database_name
-  db_username         = var.db_username
-  db_password         = var.db_password
-  publicly_accessible = var.publicly_accessible
-}
-
+# Bucket for .csv files
 module "s3" {
   source = "./modules/s3"
 
@@ -81,4 +48,42 @@ module "s3" {
   bucket_prefix = var.bucket_prefix
   acl           = var.acl
   versioning    = var.versioning
+}
+
+# Bucket for simple PostgreSQL table
+module "rds" {
+  source = "./modules/rds"
+
+  vpc_id_rds        = module.networking.vpc_id
+  subnets_rds        = module.networking.private_subnets_ids
+
+  allocated_storage   = var.allocated_storage
+  db_engine           = var.db_engine
+  db_port             = var.db_port
+  engine_version      = var.engine_version
+  instance_type       = var.instance_type
+  database_name       = var.database_name
+  db_username         = var.db_username
+  db_password         = var.db_password
+  publicly_accessible = var.publicly_accessible
+}
+
+# Data Warehouse
+module "redshift" {
+  source = "./modules/redshift"
+
+  vpc_id_redshift = module.networking.vpc_id
+  subnet_redshift = module.networking.private_subnets_ids
+  
+  #availability_zone = var.availability_zone
+  cluster_identifier = var.cluster_identifier
+  database_name      = var.database_name
+  master_username    = var.master_username
+  master_password    = var.master_password
+  node_type          = var.node_type
+  cluster_type       = var.cluster_type
+  number_of_nodes    = var.number_of_nodes
+  skip_final_snapshot = var.skip_final_snapshot
+  db_port_redshift = var.db_port_redshift
+  publicly_accessible = var.publicly_accessible
 }

@@ -1,4 +1,3 @@
-from invoke import task
 from airflow.models import DAG
 from airflow.operators.dummy import DummyOperator
 from airflow.utils.dates import days_ago

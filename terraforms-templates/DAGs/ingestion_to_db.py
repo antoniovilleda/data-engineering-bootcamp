@@ -1,17 +1,33 @@
 from airflow.models import DAG
 from airflow.operators.dummy import DummyOperator
+from airflow.operators.python import PythonOperator
+from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.postgres.operators.postgres import PostgresOperator
+from airflow.operators.sql import BranchSQLOperator
 from airflow.utils.dates import days_ago
+from airflow.utils.trigger_rule import TriggerRule
+from airflow.providers.amazon.aws.sensors.s3_key import S3KeySensor
 
-with DAG('db_ingestion', start_date = days_ago(1), schedule_interval = '@once') as dag:
+#   Function to ingest data
+def ingest_data():
+    hook = PostgresHook()
+    file = 
+    hook.insert_rows(
+        table = 'purchase_raw.user_purchase'
+        rows =
+    )
+
+with DAG(
+    'db_ingestion', start_date = days_ago(1), schedule_interval = '@once'
+) as dag:
     start_workflow = DummyOperator(task_id = 'start_workflow')
     validate = DummyOperator(task_id = 'validate')
     prepare = PostgresOperator(
         task_id = 'prepare',
         postgres_conn_id = 'rds_connection',
         sql = '''
-            CREATE SCHEMA purchase_raw;
-            CREATE TABLE purchase_raw.user_purchase (
+            CREATE SCHEMA IF NOT EXISTS purchase_raw;
+            CREATE TABLE IF NOT EXIST purchase_raw.user_purchase (
                 invoice_number varchar(10),
                 stock_code varchar(20),
                 detail varchar(1000),
@@ -21,9 +37,30 @@ with DAG('db_ingestion', start_date = days_ago(1), schedule_interval = '@once') 
                 customer_id int,
                 country varchar(20)
             );
-        '''
+        ''',
     )
-    load = DummyOperator(task_id = 'load')
+
+    clear = PostgresOperator(
+        task_id = 'clear',
+        postgres_conn_id = 'rds_connection',
+        sql = '''DELETE FROM purchase_raw.user_purchase''',
+    )
+
+    continue_workflow = DummyOperator(task_id = 'continue_workflow')
+    
+    branch = BranchSQLOperator(
+        task_id = 'is_empty',
+        conn_id = 'rds_connection',
+        sql = 'SELECT COUNT(*) AS rows FROM purchase_raw.user_purchase',
+        follow_task_ids_if_true = [clear.task_id],  # >=1
+        follow_task_ids_if_fals = [continue_workflow.task_id], # ==0
+    )
+    load = PythonOperator(
+        task_id = 'load',
+        python_callable = ingest_data,
+        trigger_rule = TriggerRule.ONE_SUCCESS,
+    )
     end_workflow = DummyOperator(task_id = 'end_workflow')
 
-    start_workflow >> validate >> prepare >> load >> end_workflow
+    start_workflow >> validate >> prepare >> branch
+    branch >> [clear, continue_workflow] >> load >> end_workflow

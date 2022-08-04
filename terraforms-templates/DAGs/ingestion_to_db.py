@@ -9,7 +9,7 @@ from airflow.utils.trigger_rule import TriggerRule
 from airflow.providers.amazon.aws.sensors.s3 import S3KeySensor
 from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
-#   Function to ingest data
+#   Function to ingest user_purchase table
 def ingest_data():
     s3_hook = S3Hook(aws_conn_id = 'aws_default')
     psql_hook = PostgresHook(postgres_conn_id = 'rds_connection')

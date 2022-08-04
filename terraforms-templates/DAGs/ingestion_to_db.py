@@ -59,7 +59,7 @@ with DAG(
         conn_id = 'rds_connection',
         sql = 'SELECT COUNT(*) AS rows FROM purchase_raw.user_purchase',
         follow_task_ids_if_true = [clear.task_id],  # >=1
-        follow_task_ids_if_fals = [continue_workflow.task_id], # ==0
+        follow_task_ids_if_false = [continue_workflow.task_id], # ==0
     )
     load = PythonOperator(
         task_id = 'load',

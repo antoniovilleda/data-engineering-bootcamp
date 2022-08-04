@@ -14,7 +14,7 @@ def ingest_data():
     s3_hook = S3Hook(aws_conn_id = 'aws_default')
     psql_hook = PostgresHook(postgres_conn_id = 'rds_connection')
     file = s3_hook.dowload_file(
-        key = 'user_purchase.csv', bucket_name = 's3-data-bootcamp'
+        key = 'raw_data/user_purchase.csv', bucket_name = 's3-data-bootcamp'
     )
     psql_hook.bulk_load(table = 'purchase_raw.user_purchase', tmp_file = file) 
 
@@ -26,7 +26,7 @@ with DAG(
         task_id = 'validate',
         aws_conn_id = 'aws_default',
         bucket_name = 's3-data-bootcamp',
-        buket_key = 'user_purchase.csv',
+        buket_key = 'raw_data/user_purchase.csv',
     )
     prepare = PostgresOperator(
         task_id = 'prepare',

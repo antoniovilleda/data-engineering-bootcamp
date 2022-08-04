@@ -26,7 +26,7 @@ with DAG(
         task_id = 'validate',
         aws_conn_id = 'aws_default',
         bucket_name = 's3-data-bootcamp',
-        buket_key = 'raw_data/user_purchase.csv',
+        bucket_key = 'raw_data/user_purchase.csv',
     )
     prepare = PostgresOperator(
         task_id = 'prepare',

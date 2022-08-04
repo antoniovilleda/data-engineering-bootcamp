@@ -6,22 +6,28 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.operators.sql import BranchSQLOperator
 from airflow.utils.dates import days_ago
 from airflow.utils.trigger_rule import TriggerRule
-from airflow.providers.amazon.aws.sensors.s3_key import S3KeySensor
+from airflow.providers.amazon.aws.sensors.s3 import S3KeySensor
+from airflow.providers.amazon.aws.hook.s3 import S3Hook
 
 #   Function to ingest data
 def ingest_data():
-    hook = PostgresHook()
-    file = 
-    hook.insert_rows(
-        table = 'purchase_raw.user_purchase'
-        rows =
+    s3_hook = S3Hook(aws_conn_id = 'aws_default')
+    psql_hook = PostgresHook(postgres_conn_id = 'rds_connection')
+    file = s3_hook.dowload_file(
+        key = 'user_purchase.csv', bucket_name = 's3-data-bootcamp'
     )
+    psql_hook.bulk_load(table = 'purchase_raw.user_purchase', tmp_file = file) 
 
 with DAG(
     'db_ingestion', start_date = days_ago(1), schedule_interval = '@once'
 ) as dag:
     start_workflow = DummyOperator(task_id = 'start_workflow')
-    validate = DummyOperator(task_id = 'validate')
+    validate = S3KeySensor(
+        task_id = 'validate',
+        aws_conn_id = 'aws_default',
+        bucket_name = 's3-data-bootcamp',
+        buket_key = 'user_purchase.csv',
+    )
     prepare = PostgresOperator(
         task_id = 'prepare',
         postgres_conn_id = 'rds_connection',

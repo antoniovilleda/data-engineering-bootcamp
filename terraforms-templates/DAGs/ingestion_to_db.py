@@ -19,7 +19,9 @@ def ingest_data():
     psql_hook.bulk_load(table = 'purchase_raw.user_purchase', tmp_file = file) 
 
 with DAG(
-    'db_ingestion', start_date = days_ago(1), schedule_interval = '@once'
+    dag_id = 'db_ingestion',
+    start_date = days_ago(1),
+    schedule_interval = '@once'
 ) as dag:
     start_workflow = DummyOperator(task_id = 'start_workflow')
     validate = S3KeySensor(

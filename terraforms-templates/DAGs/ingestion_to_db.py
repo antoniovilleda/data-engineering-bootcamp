@@ -7,7 +7,7 @@ from airflow.operators.sql import BranchSQLOperator
 from airflow.utils.dates import days_ago
 from airflow.utils.trigger_rule import TriggerRule
 from airflow.providers.amazon.aws.sensors.s3 import S3KeySensor
-from airflow.providers.amazon.aws.hook.s3 import S3Hook
+from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
 #   Function to ingest data
 def ingest_data():

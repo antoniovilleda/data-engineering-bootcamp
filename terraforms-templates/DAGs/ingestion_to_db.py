@@ -17,9 +17,26 @@ def ingest_data():
         )
     psql_hook = PostgresHook(postgres_conn_id = 'rds_connection')
     file = s3_hook.download_file(
-        key = 'raw_data/user_purchase.csv', bucket_name = 's3-data-bootcamp-20220806230946038700000005'
+        key = 'raw_data/user_purchase.csv', bucket_name = 's3-data-bootcamp-20220807034819526700000005'
     )
-    psql_hook.bulk_load(table = 'purchase_raw.user_purchase', tmp_file = file) 
+    #psql_hook.bulk_load(table = 'purchase_raw.user_purchase', tmp_file = file),
+    psql_hook.copy_expert(
+        sql =  '''
+        COPY
+            purchase_raw.user_purchase (
+                invoice_number,
+                stock_code,
+                detail,
+                quantity,
+                invoice_date,
+                unit_price,
+                customer_id,
+                country
+                ) 
+            FROM
+                STDIN
+            DELIMITER ',' CSV HEADER''', filename = file)
+
 
 with DAG(
     dag_id = 'db_ingestion',
@@ -32,7 +49,7 @@ with DAG(
         timeout = 60,
         aws_conn_id = 'aws_default',
         #aws_conn_id = 's3_bronce',
-        bucket_name = 's3-data-bootcamp-20220806230946038700000005',
+        bucket_name = 's3-data-bootcamp-20220807034819526700000005',
         bucket_key = 'raw_data/user_purchase.csv',
     )
     prepare = PostgresOperator(

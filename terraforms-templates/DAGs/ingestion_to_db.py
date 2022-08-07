@@ -17,7 +17,7 @@ def ingest_data():
         )
     psql_hook = PostgresHook(postgres_conn_id = 'rds_connection')
     file = s3_hook.dowload_file(
-        key = 'raw_data/user_purchase.csv', bucket_name = 's3-data-bootcamp'
+        key = 'raw_data/user_purchase.csv', bucket_name = 's3-data-bootcamp-20220806230946038700000005'
     )
     psql_hook.bulk_load(table = 'purchase_raw.user_purchase', tmp_file = file) 
 
@@ -29,10 +29,10 @@ with DAG(
     start_workflow = DummyOperator(task_id = 'start_workflow')
     validate = S3KeySensor(
         task_id = 'validate',
-        timeout = 180,
+        timeout = 60,
         aws_conn_id = 'aws_default',
         #aws_conn_id = 's3_bronce',
-        bucket_name = 's3-data-bootcamp',
+        bucket_name = 's3-data-bootcamp-20220806230946038700000005',
         bucket_key = 'raw_data/user_purchase.csv',
     )
     prepare = PostgresOperator(

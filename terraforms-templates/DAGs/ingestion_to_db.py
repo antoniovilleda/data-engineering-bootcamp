@@ -16,7 +16,7 @@ def ingest_data():
         #aws_conn_id = 's3_bronce'
         )
     psql_hook = PostgresHook(postgres_conn_id = 'rds_connection')
-    file = s3_hook.dowload_file(
+    file = s3_hook.download_file(
         key = 'raw_data/user_purchase.csv', bucket_name = 's3-data-bootcamp-20220806230946038700000005'
     )
     psql_hook.bulk_load(table = 'purchase_raw.user_purchase', tmp_file = file) 

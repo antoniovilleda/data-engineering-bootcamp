@@ -11,7 +11,10 @@ from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 
 #   Function to ingest user_purchase table into postgres data base
 def ingest_data():
-    s3_hook = S3Hook(aws_conn_id = 'aws_default')
+    s3_hook = S3Hook(
+        #   aws_conn_id = 'aws_default'
+        aws_conn_id = 's3_bronce'
+        )
     psql_hook = PostgresHook(postgres_conn_id = 'rds_connection')
     file = s3_hook.dowload_file(
         key = 'raw_data/user_purchase.csv', bucket_name = 's3-data-bootcamp'
@@ -26,7 +29,8 @@ with DAG(
     start_workflow = DummyOperator(task_id = 'start_workflow')
     validate = S3KeySensor(
         task_id = 'validate',
-        aws_conn_id = 'aws_default',
+        #   aws_conn_id = 'aws_default',
+        aws_conn_id = 's3_bronce',
         bucket_name = 's3-data-bootcamp',
         bucket_key = 'raw_data/user_purchase.csv',
     )

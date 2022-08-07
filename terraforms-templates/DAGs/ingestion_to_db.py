@@ -40,7 +40,7 @@ with DAG(
         postgres_conn_id = 'rds_connection',
         sql = '''
             CREATE SCHEMA IF NOT EXISTS purchase_raw;
-            CREATE TABLE IF NOT EXIST purchase_raw.user_purchase (
+            CREATE TABLE IF NOT EXISTS purchase_raw.user_purchase (
                 invoice_number varchar(10),
                 stock_code varchar(20),
                 detail varchar(1000),
@@ -49,7 +49,7 @@ with DAG(
                 unit_price numeric(8,3),
                 customer_id int,
                 country varchar(20)
-            )
+            );
         ''',
     )
 
